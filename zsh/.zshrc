@@ -18,17 +18,18 @@ export ZSH="$HOME/.oh-my-zsh"
 ZSH_THEME="powerlevel10k/powerlevel10k"
 
 plugins=(
-  git                       # git aliases and branch info
-  zsh-autosuggestions       # fish-style history suggestions
-  zsh-syntax-highlighting   # green = valid, red = nope (before you hit enter)
-  fzf                       # fuzzy search for history (Ctrl+R) and files (Ctrl+T)
+  git
+  zsh-autosuggestions
+  zsh-syntax-highlighting
+  zsh-completions
+  fzf
 )
 
-# Autosuggestions settings
 ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=#666666"
 ZSH_AUTOSUGGEST_STRATEGY=(history completion)
 
-source $ZSH/oh-my-zsh.sh
+fpath+=${ZSH_CUSTOM:-${ZSH:-~/.oh-my-zsh}/custom}/plugins/zsh-completions/src
+[[ -f "$ZSH/oh-my-zsh.sh" ]] && source "$ZSH/oh-my-zsh.sh"
 
 # ------------------------------------------------------------------------------
 # eza — modern ls replacement
