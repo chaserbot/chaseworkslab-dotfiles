@@ -128,42 +128,28 @@ if [[ "$OS" == "macos" ]]; then
     info "zsh-completions already installed — skipping."
   fi
 
-  # ------------------------------------------------------------------------------
   # Copy .zshrc
-  # ------------------------------------------------------------------------------
-
-  # If .zshrc exists and is NOT a symlink → back it up
   if [[ -f "$HOME/.zshrc" && ! -L "$HOME/.zshrc" ]]; then
     warn "Backing up existing .zshrc to ~/.zshrc.bak"
     mv "$HOME/.zshrc" "$HOME/.zshrc.bak"
   fi
-
-  # If it's a symlink → remove it (from old setup)
   if [[ -L "$HOME/.zshrc" ]]; then
     warn "Removing existing .zshrc symlink"
     rm "$HOME/.zshrc"
   fi
-
-  # Copy new file
   cp "$DOTFILES_DIR/zsh/.zshrc" "$HOME/.zshrc"
   success ".zshrc copied."
 
-  # ------------------------------------------------------------------------------
-  # Copy .p10k.zsh (if present)
-  # ------------------------------------------------------------------------------
-
+  # Copy .p10k.zsh if it exists in the repo
   if [[ -f "$DOTFILES_DIR/zsh/.p10k.zsh" ]]; then
-
     if [[ -f "$HOME/.p10k.zsh" && ! -L "$HOME/.p10k.zsh" ]]; then
       warn "Backing up existing .p10k.zsh to ~/.p10k.zsh.bak"
       mv "$HOME/.p10k.zsh" "$HOME/.p10k.zsh.bak"
     fi
-
     if [[ -L "$HOME/.p10k.zsh" ]]; then
       warn "Removing existing .p10k.zsh symlink"
       rm "$HOME/.p10k.zsh"
     fi
-
     cp "$DOTFILES_DIR/zsh/.p10k.zsh" "$HOME/.p10k.zsh"
     success ".p10k.zsh copied."
   fi
