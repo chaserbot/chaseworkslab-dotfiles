@@ -121,6 +121,13 @@ if [[ "$OS" == "macos" ]]; then
     info "zsh-syntax-highlighting already installed — skipping."
   fi
 
+  if [[ ! -d "$CUSTOM_PLUGINS/zsh-completions" ]]; then
+    info "Installing zsh-completions..."
+    git clone https://github.com/zsh-users/zsh-completions "$CUSTOM_PLUGINS/zsh-completions"
+  else
+    info "zsh-completions already installed — skipping."
+  fi
+
   # Symlink .zshrc
   if [[ -f "$HOME/.zshrc" && ! -L "$HOME/.zshrc" ]]; then
     warn "Backing up existing .zshrc to ~/.zshrc.bak"
@@ -202,8 +209,8 @@ if [[ "$OS" == "macos" ]]; then
   echo "     (If it doesn't: run  p10k configure)"
   echo ""
   echo "  To save your p10k theme after configuring:"
-  echo "    cp ~/.p10k.zsh ~/dotfiles/zsh/.p10k.zsh"
-  echo "    cd ~/dotfiles && git add -A && git commit -m 'add p10k config' && git push"
+  echo "    cp ~/.p10k.zsh \"$DOTFILES_DIR/zsh/.p10k.zsh\""
+  echo "    cd \"$DOTFILES_DIR\" && git add -A && git commit -m 'add p10k config' && git push"
 fi
 
 if [[ "$OS" == "debian" ]]; then
