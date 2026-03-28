@@ -167,7 +167,7 @@ if [[ "$OS" == "debian" ]]; then
         | grep '"tag_name"' | head -1 | sed 's/.*"tag_name": "\(.*\)".*/\1/')
       curl -Lo /tmp/eza.tar.gz \
         "https://github.com/eza-community/eza/releases/download/${EZA_VERSION}/eza_${EZA_ARCH}.tar.gz"
-      $SUDO tar -xzf /tmp/eza.tar.gz -C /usr/local/bin eza
+      $SUDO tar -xzf /tmp/eza.tar.gz -C /usr/local/bin ./eza
       rm /tmp/eza.tar.gz
       success "eza installed."
     else
