@@ -24,6 +24,10 @@ plugins=(
   fzf                       # fuzzy search for history (Ctrl+R) and files (Ctrl+T)
 )
 
+# Autosuggestions settings
+ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=#666666"
+ZSH_AUTOSUGGEST_STRATEGY=(history completion)
+
 source $ZSH/oh-my-zsh.sh
 
 # ------------------------------------------------------------------------------
