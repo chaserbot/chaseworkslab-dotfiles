@@ -79,12 +79,10 @@ init_monorepo() {
   cd "$MONOREPO_DIR"
 
   # Init with main branch (git >= 2.28 supports -b; fall back gracefully)
-  if git init -b main &>/dev/null 2>&1; then
-    git init -b main
-  else
+  git init -b main &>/dev/null 2>&1 || {
     git init
     git checkout -b main 2>/dev/null || true
-  fi
+  }
 
   # Root .gitignore
   cat > .gitignore << 'EOF'
