@@ -446,7 +446,7 @@ EOF
   # --------------------------------------------------------------------------
   # DECISIONS.md
   # --------------------------------------------------------------------------
-  cat > DECISIONS.md << 'EOF'
+  cat > DECISIONS.md << EOF
 # Decisions
 
 Architectural decision log. Add an entry whenever a meaningful infrastructure
