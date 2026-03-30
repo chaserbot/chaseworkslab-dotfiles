@@ -510,7 +510,7 @@ To revert to standalone workflow, simply clone the individual repos again.
 The monorepo can be abandoned without any data loss.
 EOF
 
-  git add README.md AGENTS.md CLAUDE.md STACK.md CURRENT_STATE.md NEXT_STEPS.md DECISIONS.md
+  git add -A
   git commit -m "docs: add LLM context and memory files to monorepo root"
 
   success "Context files written and committed."
