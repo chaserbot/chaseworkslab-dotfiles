@@ -114,10 +114,11 @@ EOF
 #
 # The core technique (pure git, no extra tools):
 #   1. Add remote, fetch
-#   2. git merge -s ours --no-commit --allow-unrelated-histories
-#   3. git read-tree --prefix=<subfolder>/ -u <remote>/<branch>
-#   4. git commit
-#   5. Remove remote
+#   2. git read-tree --prefix=<subfolder>/ (clean index, no merge state)
+#   3. git checkout-index -f -a (sync working tree)
+#   4. git commit-tree with two parents (HEAD + remote) to create merge commit
+#   5. git reset --hard to the new commit
+#   6. Remove remote
 # ==============================================================================
 import_repo() {
   local repo_name="$1"
@@ -164,18 +165,28 @@ import_repo() {
   git remote add "$repo_name" "$remote_url"
   git fetch "$repo_name" --no-tags
 
-  # Merge scaffold: ours strategy creates a merge commit without touching the working tree
-  git merge -s ours --no-commit --allow-unrelated-histories "${repo_name}/${resolved_branch}"
-
-  # Read the remote's tree into the subfolder (index only — -u is avoided because
-  # it triggers 3-way merge logic in a mid-merge state and conflicts with existing
-  # files like .gitignore at the monorepo root)
+  # Read the remote's tree into the subfolder.
+  # Done BEFORE any merge operation so the index is clean — git read-tree
+  # triggers 3-way merge conflict checks whenever MERGE_HEAD is set, which
+  # causes false conflicts on files like .gitignore even with --prefix.
   git read-tree --prefix="${subfolder}/" "${repo_name}/${resolved_branch}"
+
   # Sync the working tree from the index for the new subfolder
   git checkout-index -f -a
 
-  # Commit with clear attribution
-  git commit -m "chore: import ${repo_name} into ${subfolder}/"
+  # Build a merge commit manually with two parents: current HEAD and the remote.
+  # This preserves full history (git log -- subfolder/ shows original commits)
+  # without going through the mid-merge state that breaks git read-tree.
+  local cur_head remote_commit tree_sha new_commit
+  cur_head=$(git rev-parse HEAD)
+  remote_commit=$(git rev-parse "${repo_name}/${resolved_branch}")
+  tree_sha=$(git write-tree)
+  new_commit=$(git commit-tree \
+    -p "$cur_head" \
+    -p "$remote_commit" \
+    -m "chore: import ${repo_name} into ${subfolder}/" \
+    "$tree_sha")
+  git reset --hard "$new_commit"
 
   # Clean up remote (history is already baked into the monorepo)
   git remote remove "$repo_name"
