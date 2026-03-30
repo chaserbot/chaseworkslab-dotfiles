@@ -126,6 +126,12 @@ import_repo() {
 
   cd "$MONOREPO_DIR"
 
+  # Abort any incomplete merge left by a previous interrupted run
+  if [[ -f ".git/MERGE_HEAD" ]]; then
+    warn "  Aborting incomplete merge from previous run..."
+    git merge --abort
+  fi
+
   # Idempotency guard — skip if subfolder already has commits
   if [[ -d "$subfolder" ]] && git log --oneline -- "$subfolder" 2>/dev/null | grep -q .; then
     warn "  $subfolder/ already imported — skipping $repo_name."
@@ -161,8 +167,12 @@ import_repo() {
   # Merge scaffold: ours strategy creates a merge commit without touching the working tree
   git merge -s ours --no-commit --allow-unrelated-histories "${repo_name}/${resolved_branch}"
 
-  # Read the remote's tree into the subfolder
-  git read-tree --prefix="${subfolder}/" -u "${repo_name}/${resolved_branch}"
+  # Read the remote's tree into the subfolder (index only — -u is avoided because
+  # it triggers 3-way merge logic in a mid-merge state and conflicts with existing
+  # files like .gitignore at the monorepo root)
+  git read-tree --prefix="${subfolder}/" "${repo_name}/${resolved_branch}"
+  # Sync the working tree from the index for the new subfolder
+  git checkout-index -f -a
 
   # Commit with clear attribution
   git commit -m "chore: import ${repo_name} into ${subfolder}/"
@@ -446,7 +456,9 @@ EOF
   # --------------------------------------------------------------------------
   # DECISIONS.md
   # --------------------------------------------------------------------------
-  cat > DECISIONS.md << 'EOF'
+  local today
+  today=$(date +%Y-%m-%d)
+  cat > DECISIONS.md << EOF
 # Decisions
 
 Architectural decision log. Add an entry whenever a meaningful infrastructure
@@ -461,7 +473,7 @@ Format:
 
 ---
 
-## $(date +%Y-%m-%d): Consolidate all chaseworkslab repos into a monorepo
+## ${today}: Consolidate all chaseworkslab repos into a monorepo
 
 **Decision:** Merged 10 standalone GitHub repos into a single monorepo
 (`chaserbot/chaseworkslab`) using `git read-tree` to preserve full commit history
