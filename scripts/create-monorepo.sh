@@ -69,21 +69,28 @@ preflight() {
 # Section 2: Initialize monorepo
 # ==============================================================================
 init_monorepo() {
-  if [[ -d "$MONOREPO_DIR/.git" ]]; then
+  # Already fully initialized: .git exists AND has at least one commit
+  if [[ -d "$MONOREPO_DIR/.git" ]] && git -C "$MONOREPO_DIR" rev-parse HEAD &>/dev/null 2>&1; then
     info "Monorepo already initialized — skipping init."
     return 0
   fi
 
-  info "Creating monorepo at $MONOREPO_DIR..."
-  mkdir -p "$MONOREPO_DIR"
-  cd "$MONOREPO_DIR"
+  if [[ ! -d "$MONOREPO_DIR/.git" ]]; then
+    info "Creating monorepo at $MONOREPO_DIR..."
+    mkdir -p "$MONOREPO_DIR"
+    cd "$MONOREPO_DIR"
 
-  # Init with main branch (git >= 2.28 supports -b; fall back gracefully)
-  if git init -b main &>/dev/null 2>&1; then
-    git init -b main
+    # Init with main branch (git >= 2.28 supports -b; fall back gracefully)
+    if git init -b main &>/dev/null 2>&1; then
+      git init -b main
+    else
+      git init
+      git checkout -b main 2>/dev/null || true
+    fi
   else
-    git init
-    git checkout -b main 2>/dev/null || true
+    # .git exists but no commits (e.g. repo was git-init'd manually but never committed)
+    warn "Repo exists but has no commits — creating initial commit."
+    cd "$MONOREPO_DIR"
   fi
 
   # Root .gitignore
